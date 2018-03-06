@@ -1,12 +1,37 @@
 apply plugin: 'java'
 
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.4.1'
+}
 
 repositories {
-    jcenter()
+  jcenter()
+}
+
+sourceSets {
+  integrationTest {
+    java { srcDir 'src/integrationtest/java' }
+    resources { srcDir 'src/integrationtest/resources' }
+    runtimeClasspath += main.output + test.output
+    compileClasspath += sourceSets.test.runtimeClasspath
+  }
+}
+
+configurations {
+  integrationTestCompile.extendsFrom testCompile
+  integrationTestRuntime.extendsFrom testRuntime
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-api:1.7.25'
-
-    testCompile 'junit:junit:4.12'
+  compile 'org.slf4j:slf4j-api:1.7.25'
+  
+  testCompile 'junit:junit:4.12'
 }
+
+task integrationTest(type: Test){
+  description = "Run integration tests located in src/integrationtest/..."
+  testClassesDir = sourceSets.integrationTest.output.classesDir
+  classpath = sourceSets.integrationTest.runtimeClasspath
+  outputs.upToDateWhen { false }
+}
+
